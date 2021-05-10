@@ -4,7 +4,13 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>bitcoin.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Images\bitcoin.ico" />
+    <None Remove="Resources\Images\bitcoin.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CoinEx.Net" Version="3.2.6" />
@@ -12,7 +18,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Utilities\" />
     <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\bitcoin.ico" />
+    <Resource Include="Resources\Images\bitcoin.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

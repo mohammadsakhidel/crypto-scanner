@@ -4,9 +4,92 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CryptoScanner.Views"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="Crypto Scanner" WindowState="Maximized" WindowStartupLocation="CenterScreen">
+
+    <Border Style="{StaticResource main}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--SIDEBAR-->
+            <Border Style="{StaticResource sidebar}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Style="{StaticResource headerContainer}">
+                        <Label Style="{StaticResource header}">Crypto Scanner</Label>
+                    </Border>
+
+                    <StackPanel Grid.Row="1" Margin="20">
+                        <Label>Time Frame:</Label>
+                        <ComboBox>
+                            <ComboBoxItem>M1</ComboBoxItem>
+                            <ComboBoxItem>M5</ComboBoxItem>
+                            <ComboBoxItem IsSelected="true">M15</ComboBoxItem>
+                            <ComboBoxItem>M30</ComboBoxItem>
+                            <ComboBoxItem>H1</ComboBoxItem>
+                            <ComboBoxItem>D1</ComboBoxItem>
+                        </ComboBox>
+
+                        <StackPanel Orientation="Horizontal" Margin="0 15 0 0">
+                            <Label>Relative Volume:</Label>
+                            <Label>2.0</Label>
+                        </StackPanel>
+                        <Slider Value="2" Minimum="1" Maximum="10" SmallChange="0.5"></Slider>
+
+                        <StackPanel Margin="0 15 0 0">
+                            <CheckBox Content="Any" IsChecked="true" />
+                            <CheckBox Content="Pinbar" IsChecked="false" />
+                            <CheckBox Content="Engulfing" IsChecked="false" />
+                            <CheckBox Content="Insidebar" IsChecked="false" />
+                        </StackPanel>
+
+                        <Button Margin="0 15 0 0" Content="Start Scanning..."></Button>
+                    </StackPanel>
+
+                </Grid>
+            </Border>
+            
+            <!--CONTENT-->
+            <Border Grid.Column="1" Margin="20 0 0 0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Status: " />
+                        <Label Content="----" />
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Margin="0 20 0 0" BorderThickness="0 1 0 0" BorderBrush="#535353">
+                        <ScrollViewer VerticalScrollBarVisibility="Visible">
+                            <TextBlock></TextBlock>
+                        </ScrollViewer>
+                    </Border>
+                    
+
+                </Grid>
+            </Border>
+            
+            <!--FOOTER-->
+            <Border Grid.Row="1" Style="{StaticResource footer}" Grid.ColumnSpan="2">
+                <Grid>
+                    <Label HorizontalAlignment="Left" Style="{StaticResource error}">An error occurred.</Label>
+                    <Label HorizontalAlignment="Center" FontSize="10" Foreground="Gray">Developed by Mohammad Sakhidel</Label>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+    
 </Window>

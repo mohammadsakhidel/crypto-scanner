@@ -1,0 +1,46 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style x:Key="main" TargetType="Border">
+        <Setter Property="Background" Value="#282c34"></Setter>
+        <Setter Property="Padding" Value="20"></Setter>
+    </Style>
+
+    <Style x:Key="sidebar" TargetType="Border">
+        <Setter Property="Background" Value="#21252b"></Setter>
+        <Setter Property="CornerRadius" Value="10"></Setter>
+    </Style>
+
+    <Style TargetType="{x:Type Label}">
+        <Setter Property="Foreground" Value="#e7e7e7"></Setter>
+    </Style>
+
+    <Style TargetType="{x:Type CheckBox}">
+        <Setter Property="Foreground" Value="#e7e7e7"></Setter>
+    </Style>
+
+    <Style x:Key="headerContainer" TargetType="Border">
+        <Setter Property="BorderThickness" Value="0 0 0 1"></Setter>
+        <Setter Property="BorderBrush" Value="#535353"></Setter>
+        <Setter Property="VerticalAlignment" Value="Top"></Setter>
+        <Setter Property="Margin" Value="0 0 0 15"></Setter>
+    </Style>
+    
+    <Style x:Key="header" TargetType="Label">
+        <Setter Property="Foreground" Value="#e5c067"></Setter>
+        <Setter Property="FontSize" Value="22"></Setter>
+        <Setter Property="Padding" Value="15"></Setter>
+        <Setter Property="FontWeight" Value="Bold"></Setter>
+        <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+    </Style>
+
+    <Style x:Key="footer" TargetType="Border">
+        <Setter Property="BorderThickness" Value="0 1 0 0"></Setter>
+        <Setter Property="BorderBrush" Value="#535353"></Setter>
+    </Style>
+
+    <Style x:Key="error" TargetType="Label">
+        <Setter Property="Foreground" Value="#da4f40"></Setter>
+        <Setter Property="FontWeight" Value="Bold"></Setter>
+        <Setter Property="FontSize" Value="14"></Setter>
+    </Style>
+</ResourceDictionary>
