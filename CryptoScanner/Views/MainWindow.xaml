@@ -88,8 +88,8 @@
                     </StackPanel>
 
                     <Border Grid.Row="1" Margin="0 20 0 0" BorderThickness="0 1 0 0" BorderBrush="#535353">
-                        <ScrollViewer VerticalScrollBarVisibility="Visible">
-                            <TextBlock></TextBlock>
+                        <ScrollViewer VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged">
+                            <TextBlock Style="{StaticResource log}" Text="{Binding Log}"></TextBlock>
                         </ScrollViewer>
                     </Border>
                     
@@ -100,8 +100,8 @@
             <!--FOOTER-->
             <Border Grid.Row="1" Style="{StaticResource footer}" Grid.ColumnSpan="2">
                 <Grid>
-                    <Label HorizontalAlignment="Left" Style="{StaticResource error}">An error occurred.</Label>
-                    <Label HorizontalAlignment="Center" FontSize="10" Foreground="Gray">Developed by Mohammad Sakhidel</Label>
+                    <Label HorizontalAlignment="Left" Style="{StaticResource error}" Content="{Binding Error}"></Label>
+                    <Label HorizontalAlignment="Center" FontSize="12" Foreground="Gray">Developed by: Mohammad Sakhidel</Label>
                 </Grid>
             </Border>
         </Grid>

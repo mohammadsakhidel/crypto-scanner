@@ -18,5 +18,9 @@ namespace CryptoScanner.Views {
         public MainWindow() {
             InitializeComponent();
         }
+
+        private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e) {
+            //((ScrollViewer)e.OriginalSource).ScrollToEnd();
+        }
     }
 }

@@ -44,4 +44,10 @@
         <Setter Property="FontWeight" Value="Bold"></Setter>
         <Setter Property="FontSize" Value="14"></Setter>
     </Style>
+
+    <Style x:Key="log" TargetType="TextBlock">
+        <Setter Property="Padding" Value="0 20 20 20"></Setter>
+        <Setter Property="FontSize" Value="14"></Setter>
+        <Setter Property="Foreground" Value="#e5c067"></Setter>
+    </Style>
 </ResourceDictionary>
