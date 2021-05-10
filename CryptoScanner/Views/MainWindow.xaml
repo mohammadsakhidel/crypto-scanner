@@ -31,10 +31,10 @@
 
                     <StackPanel Grid.Row="1" Margin="20">
                         <Label>Time Frame:</Label>
-                        <ComboBox>
+                        <ComboBox SelectedIndex="{Binding Timeframe}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
                             <ComboBoxItem>M1</ComboBoxItem>
                             <ComboBoxItem>M5</ComboBoxItem>
-                            <ComboBoxItem IsSelected="true">M15</ComboBoxItem>
+                            <ComboBoxItem>M15</ComboBoxItem>
                             <ComboBoxItem>M30</ComboBoxItem>
                             <ComboBoxItem>H1</ComboBoxItem>
                             <ComboBoxItem>D1</ComboBoxItem>
@@ -42,18 +42,30 @@
 
                         <StackPanel Orientation="Horizontal" Margin="0 15 0 0">
                             <Label>Relative Volume:</Label>
-                            <Label>2.0</Label>
+                            <TextBlock Padding="5" Foreground="#e7e7e7"
+                                       Text="{Binding RelativeVolume, StringFormat=N1}"></TextBlock>
                         </StackPanel>
-                        <Slider Value="2" Minimum="1" Maximum="10" SmallChange="0.5"></Slider>
+                        <Slider Value="{Binding RelativeVolume}"
+                                Minimum="1" Maximum="10"
+                                IsSnapToTickEnabled="True"
+                                TickFrequency="0.5"
+                                IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}"/>
 
                         <StackPanel Margin="0 15 0 0">
-                            <CheckBox Content="Any" IsChecked="true" />
-                            <CheckBox Content="Pinbar" IsChecked="false" />
-                            <CheckBox Content="Engulfing" IsChecked="false" />
-                            <CheckBox Content="Insidebar" IsChecked="false" />
+                            <CheckBox Content="Any" IsChecked="true" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" />
+                            <CheckBox Content="Pinbar" IsChecked="false" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" />
+                            <CheckBox Content="Engulfing" IsChecked="false" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" />
+                            <CheckBox Content="Insidebar" IsChecked="false" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" />
                         </StackPanel>
 
-                        <Button Margin="0 15 0 0" Content="Start Scanning..."></Button>
+                        <Button Margin="0 15 0 0" Content="Start Scanning..." 
+                                Command="{Binding Start}"
+                                Visibility="{Binding IsScanning, Converter={StaticResource cBoolVis}, ConverterParameter=true}"></Button>
+
+                        <Button Margin="0 15 0 0" Content="Stop" 
+                                Command="{Binding Stop}"
+                                Visibility="{Binding IsScanning, Converter={StaticResource cBoolVis}, ConverterParameter=false}"></Button>
+                        
                     </StackPanel>
 
                 </Grid>
@@ -69,7 +81,10 @@
 
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Status: " />
-                        <Label Content="----" />
+                        <Label Content="Scanning" Foreground="LimeGreen"
+                               Visibility="{Binding IsScanning, Converter={StaticResource cBoolVis}, ConverterParameter=false}" />
+                        <Label Content="Stopped" Foreground="Red"
+                               Visibility="{Binding IsScanning, Converter={StaticResource cBoolVis}, ConverterParameter=true}" />
                     </StackPanel>
 
                     <Border Grid.Row="1" Margin="0 20 0 0" BorderThickness="0 1 0 0" BorderBrush="#535353">

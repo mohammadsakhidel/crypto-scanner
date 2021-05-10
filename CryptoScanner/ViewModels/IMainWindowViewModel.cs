@@ -4,5 +4,8 @@ using System.Text;
 
 namespace CryptoScanner.ViewModels {
     public interface IMainWindowViewModel : IViewModel {
+
+        
+
     }
 }
