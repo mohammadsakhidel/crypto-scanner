@@ -48,7 +48,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _anySelected;
+        private bool _anySelected = true;
         public bool AnySelected {
             get { return _anySelected; }
             set {
@@ -184,7 +184,7 @@ namespace CryptoScanner.ViewModels {
                 AddToLog("Fetching symbols failed.");
                 return;
             } else {
-                AddToLog($"Symbols ({symbols.Count()}) data fetched.");
+                //AddToLog($"Symbols ({symbols.Count()}) data fetched.");
             }
 
             var opportunities = new List<Opportunity>();
@@ -206,7 +206,7 @@ namespace CryptoScanner.ViewModels {
                 }
                 AddToLog(message);
             } else {
-                AddToLog("No opportunity found.");
+                //AddToLog("No opportunity found.");
             }
         }
 
@@ -215,6 +215,9 @@ namespace CryptoScanner.ViewModels {
         }
 
         private void UpdateLastLine(string text) {
+            if (string.IsNullOrEmpty(Log))
+                Log = "\n";
+
             var lines = Log.Split("\n");
             lines[lines.Length - 1] = text;
 
@@ -222,6 +225,8 @@ namespace CryptoScanner.ViewModels {
         }
 
         private async Task<Opportunity> IsOpportunityAsync(string symbol) {
+
+            var checklist = new OppChecklist();
 
             #region RETREIVE CANDLES:
             var client = new CryptoAPIClient();
@@ -239,24 +244,56 @@ namespace CryptoScanner.ViewModels {
             #endregion
 
             #region CHECK UNUSUAL VOLUME:
+            var lastCandleIndex = 1;
+            var prevCandleIndex = 2;
             var isVolumeUnusual = false;
             var volSum = 0.0;
             var volAvg = 0.0;
-            foreach (var candle in candles) {
+            for (int i = prevCandleIndex; i < candles.Count; i++) {
+                var candle = candles[i];
                 volSum += candle.Volume;
             }
             volAvg = volSum / candles.Count;
 
-            Candle lastCandle = candles[1];
+            Candle lastCandle = candles[lastCandleIndex];
             isVolumeUnusual = lastCandle.Volume > volAvg * RelativeVolume;
 
             if (isVolumeUnusual) {
-                return new Opportunity {
-                    Exists = true,
-                    Reason = "Volume",
-                    Symbol = symbol,
-                    CandleTime = lastCandle.Time
-                };
+                checklist.UnusualVolume = true;
+                checklist.RelativeVolume = lastCandle.Volume / volAvg;
+            }
+            #endregion
+
+            #region CHECK CANDLESTICK PATTERN:
+            if (!AnySelected) {
+                var pattern = CandlestickPattern.Find(candles);
+                if (pattern == null)
+                    return new Opportunity { Exists = false };
+
+                checklist.Pattern = pattern;
+            }
+            #endregion
+
+            #region PROCESS CHECKLIST:
+            if (checklist.UnusualVolume) {
+
+                var allowedPatterns = new List<PatternType>();
+                if (PinbarSelected)
+                    allowedPatterns.Add(PatternType.Pinbar);
+                if (EngulfingSelected)
+                    allowedPatterns.Add(PatternType.Engulfing);
+                if (InsidebarSelected)
+                    allowedPatterns.Add(PatternType.Insidebar);
+
+                if (AnySelected || allowedPatterns.Contains(checklist.Pattern.Type)) {
+                    return new Opportunity {
+                        Exists = true,
+                        Checklist = checklist,
+                        Symbol = symbol,
+                        CandleTime = lastCandle.Time
+                    };
+                }
+
             }
             #endregion
 

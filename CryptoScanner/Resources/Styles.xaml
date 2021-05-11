@@ -14,10 +14,6 @@
         <Setter Property="Foreground" Value="#e7e7e7"></Setter>
     </Style>
 
-    <Style TargetType="{x:Type CheckBox}">
-        <Setter Property="Foreground" Value="#e7e7e7"></Setter>
-    </Style>
-
     <Style x:Key="headerContainer" TargetType="Border">
         <Setter Property="BorderThickness" Value="0 0 0 1"></Setter>
         <Setter Property="BorderBrush" Value="#535353"></Setter>

@@ -28,5 +28,40 @@ namespace CryptoScanner.Models {
         [JsonPropertyName("v")]
         public double Volume { get; set; }
 
+        public double Size {
+            get {
+                return Math.Abs(High - Low);
+            }
+        }
+
+        public double BodySize {
+            get {
+                return Math.Abs(Open - Close);
+            }
+        }
+
+        public double ShadowSize {
+            get {
+                return Math.Abs(Low - Math.Min(Open, Close));
+            }
+        }
+
+        public double NoseSize {
+            get {
+                return Math.Abs(High - Math.Max(Open, Close));
+            }
+        }
+
+        public bool IsBullish {
+            get {
+                return Close > Open;
+            }
+        }
+
+        public bool IsBearish {
+            get {
+                return Close < Open;
+            }
+        }
     }
 }

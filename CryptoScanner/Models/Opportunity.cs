@@ -9,10 +9,10 @@ namespace CryptoScanner.Models {
         public string Symbol { get; set; }
         public DateTime CandleTime { get; set; }
         public bool Exists { get; set; }
-        public string Reason { get; set; }
+        public OppChecklist Checklist { get; set; }
 
         public override string ToString() {
-            return $"[{Symbol}]: {Reason} ({CandleTime.ToShortTimeString()})";
+            return $"[ {Symbol} ] {Checklist.RelativeVolume.ToString("F1")}x Volume, Pattern: {Checklist.Pattern.Type.ToString()} ({CandleTime.ToShortTimeString()})";
         }
     }
 }
