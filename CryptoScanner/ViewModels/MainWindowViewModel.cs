@@ -48,7 +48,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _anySelected = true;
+        private bool _anySelected = false;
         public bool AnySelected {
             get { return _anySelected; }
             set {
@@ -57,7 +57,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _pinbarSelected;
+        private bool _pinbarSelected = true;
         public bool PinbarSelected {
             get { return _pinbarSelected; }
             set {
@@ -66,7 +66,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _insidebarSelected;
+        private bool _insidebarSelected = false;
         public bool InsidebarSelected {
             get { return _insidebarSelected; }
             set {
@@ -75,12 +75,30 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _engulfingSelected;
+        private bool _engulfingSelected = true;
         public bool EngulfingSelected {
             get { return _engulfingSelected; }
             set {
                 _engulfingSelected = value;
                 OnPropertyChanged(nameof(EngulfingSelected));
+            }
+        }
+
+        private bool _momentumSelected = true;
+        public bool MomentumSelected {
+            get { return _momentumSelected; }
+            set {
+                _momentumSelected = value;
+                OnPropertyChanged(nameof(MomentumSelected));
+            }
+        }
+
+        private bool _soldiersSelected = true;
+        public bool SoldiersSelected {
+            get { return _soldiersSelected; }
+            set {
+                _soldiersSelected = value;
+                OnPropertyChanged(nameof(SoldiersSelected));
             }
         }
 

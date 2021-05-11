@@ -61,6 +61,12 @@
                             <CheckBox IsChecked="{Binding EngulfingSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
                                 <Label Padding="0" Margin="0">Engulfing</Label>
                             </CheckBox>
+                            <CheckBox IsChecked="{Binding MomentumSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
+                                <Label Padding="0" Margin="0">Momentum</Label>
+                            </CheckBox>
+                            <CheckBox IsChecked="{Binding SoldiersSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
+                                <Label Padding="0" Margin="0">Soldiers</Label>
+                            </CheckBox>
                             <CheckBox IsChecked="{Binding InsidebarSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}"
                                       Visibility="Collapsed">
                                 <Label Padding="0" Margin="0">Insidebar</Label>

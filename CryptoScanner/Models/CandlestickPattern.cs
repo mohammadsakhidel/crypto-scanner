@@ -15,6 +15,7 @@ namespace CryptoScanner.Models {
 
             var candle = candles[startIndex];
             var prevCandle = candles[startIndex + 1];
+            var thirdCandle = candles[startIndex + 2];
 
             // PINBAR:
             var isPinbar = candle.IsBullish && candle.ShadowSize / candle.Size > Values.PINBAR_SHADOW_RATIO;
@@ -29,6 +30,19 @@ namespace CryptoScanner.Models {
                 return new CandlestickPattern { Type = PatternType.Engulfing, StartIndex = startIndex + 1, EndIndex = startIndex };
             }
 
+            // SOLDIERS:
+            var isSoldiers = candle.IsBullish && prevCandle.IsBullish && thirdCandle.IsBullish
+                && candle.BodySize > prevCandle.BodySize && prevCandle.BodySize > thirdCandle.BodySize;
+            if (isSoldiers) {
+                return new CandlestickPattern { Type = PatternType.Soldiers, StartIndex = startIndex+2, EndIndex = startIndex };
+            }
+
+            // MOMENTUME:
+            var isMomentum = candle.IsBullish && candle.BodySize / candle.Size > Values.MOMENTUM_BODY_RATIO;
+            if (isMomentum) {
+                return new CandlestickPattern { Type = PatternType.Momentum, StartIndex = startIndex, EndIndex = startIndex };
+            }
+
             return null;
         }
 
@@ -37,6 +51,8 @@ namespace CryptoScanner.Models {
     public enum PatternType {
         Pinbar = 1,
         Insidebar = 2,
-        Engulfing = 3
+        Engulfing = 3,
+        Momentum = 4,
+        Soldiers = 5
     }
 }

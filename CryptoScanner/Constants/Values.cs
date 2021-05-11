@@ -13,6 +13,7 @@ namespace CryptoScanner.Constants {
         public const int CANDLES_TO_LOAD = 24;
         public const double PINBAR_SHADOW_RATIO = 0.66;
         public const double ENGULF_MAX_NOSE_RATIO = 0.2;
+        public const double MOMENTUM_BODY_RATIO = 0.9;
 
     }
 }
