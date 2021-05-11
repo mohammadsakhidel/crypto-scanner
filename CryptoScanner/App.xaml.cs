@@ -22,6 +22,7 @@ namespace CryptoScanner {
                 IServiceCollection services = new ServiceCollection();
                 services.AddWindows();
                 services.AddViewModels();
+                services.AddSMSManager();
 
                 Services = services.BuildServiceProvider();
 

@@ -1,4 +1,5 @@
-﻿using CryptoScanner.ViewModels;
+﻿using CryptoScanner.Utils;
+using CryptoScanner.ViewModels;
 using CryptoScanner.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -19,6 +20,10 @@ namespace CryptoScanner.Extensions {
         public static void AddViewModels(this IServiceCollection services) {
             services.AddTransient<IMainWindowViewModel, MainWindowViewModel>();
             services.AddTransient<IHomePageViewModel, HomePageViewModel>();
+        }
+
+        public static void AddSMSManager(this IServiceCollection services) {
+            services.AddSingleton<ISmsManager, SmsDotIrSmsManager>();
         }
     }
 }

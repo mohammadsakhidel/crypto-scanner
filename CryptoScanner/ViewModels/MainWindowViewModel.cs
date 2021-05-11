@@ -7,6 +7,7 @@ using CryptoScanner.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -218,11 +219,17 @@ namespace CryptoScanner.ViewModels {
             UpdateLastLine("\n");
 
             if (opportunities.Any()) {
-                var message = $"Opportunities found:\n";
+                var timeframeName = Collections.Timeframes.First(tf => tf.index == Timeframe).name;
+                var message = $"OPPORTUNITIES ({timeframeName}):\n";
                 foreach (var opp in opportunities) {
                     message += opp.ToString() + "\n";
                 }
                 AddToLog(message);
+
+                var notificationSent = await SendNotificationAsync(message);
+                if (!notificationSent)
+                    AddToLog("Notification sending failed.");
+
             } else {
                 //AddToLog("No opportunity found.");
             }
@@ -316,6 +323,21 @@ namespace CryptoScanner.ViewModels {
             #endregion
 
             return new Opportunity { Exists = false };
+        }
+
+        private async Task<bool> SendNotificationAsync(string message) {
+            try {
+
+                return await Task.Run(() => {
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "numbers.txt");
+                    var numbers = File.ReadAllLines(filePath);
+                    var smsManager = App.Services.GetRequiredService<ISmsManager>();
+                    return smsManager.Send(message, numbers);
+                });
+
+            } catch {
+                return false;
+            }
         }
         #endregion
 
