@@ -155,6 +155,19 @@ namespace CryptoScanner.ViewModels {
                 return _stop;
             }
         }
+
+        private RelayCommand _clearLogs;
+        public RelayCommand ClearLogs {
+            get {
+                if (_clearLogs == null) {
+                    _clearLogs = new RelayCommand(_ => {
+                        Log = string.Empty;
+                    });
+                }
+
+                return _clearLogs;
+            }
+        }
         #endregion
 
         #region METHODS:

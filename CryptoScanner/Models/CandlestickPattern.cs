@@ -18,7 +18,7 @@ namespace CryptoScanner.Models {
             var thirdCandle = candles[startIndex + 2];
 
             // PINBAR:
-            var isPinbar = candle.IsBullish && candle.ShadowSize / candle.Size > Values.PINBAR_SHADOW_RATIO;
+            var isPinbar = candle.ShadowSize / candle.Size > Values.PINBAR_SHADOW_RATIO;
             if (isPinbar) {
                 return new CandlestickPattern { Type = PatternType.Pinbar, StartIndex = startIndex, EndIndex = startIndex };
             }
@@ -38,7 +38,7 @@ namespace CryptoScanner.Models {
             }
 
             // MOMENTUME:
-            var isMomentum = candle.IsBullish && candle.BodySize / candle.Size > Values.MOMENTUM_BODY_RATIO;
+            var isMomentum = candle.IsBullish && candle.NoseSize < candle.ShadowSize && candle.BodySize / candle.Size > Values.MOMENTUM_BODY_RATIO;
             if (isMomentum) {
                 return new CandlestickPattern { Type = PatternType.Momentum, StartIndex = startIndex, EndIndex = startIndex };
             }

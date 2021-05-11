@@ -103,6 +103,11 @@
                     </StackPanel>
 
                     <Border Grid.Row="1" Margin="0 20 0 0" BorderThickness="0 1 0 0" BorderBrush="#535353">
+                        <Border.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Clear Logs" Command="{Binding ClearLogs}" />
+                            </ContextMenu>
+                        </Border.ContextMenu>
                         <ScrollViewer VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged">
                             <TextBlock Style="{StaticResource log}" Text="{Binding Log}"></TextBlock>
                         </ScrollViewer>
