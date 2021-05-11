@@ -12,7 +12,7 @@ namespace CryptoScanner.Models {
         public OppChecklist Checklist { get; set; }
 
         public override string ToString() {
-            return $"[ {Symbol} ] {Checklist.RelativeVolume:F1}x VOL{(Checklist.Pattern != null ? $" - {Checklist.Pattern.Type}" : string.Empty)}";
+            return $"( {Symbol} ) {Checklist.RelativeVolume:F1}x VOL{(Checklist.Pattern != null ? $"  {Checklist.Pattern.Type}" : string.Empty)}";
         }
     }
 }

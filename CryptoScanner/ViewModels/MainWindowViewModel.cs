@@ -174,6 +174,8 @@ namespace CryptoScanner.ViewModels {
                             lastProcessedTimeBlock = timeBlock;
 
                         }
+
+                        Thread.Sleep(1000);
                     }
 
                 } catch (Exception ex) {
