@@ -346,6 +346,9 @@ namespace CryptoScanner.ViewModels {
                 return await Task.Run(() => {
                     var filePath = Path.Combine(Directory.GetCurrentDirectory(), "numbers.txt");
                     var numbers = File.ReadAllLines(filePath);
+                    if (!numbers.Where(n => !string.IsNullOrEmpty(n)).Any())
+                        return true;
+
                     var smsManager = App.Services.GetRequiredService<ISmsManager>();
                     return smsManager.Send(message, numbers);
                 });
