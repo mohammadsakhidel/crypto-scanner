@@ -49,7 +49,27 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _anySelected = false;
+        private int testedCandles = Convert.ToInt32(App.Configuration["ScanSettings:TestedCandles"]);
+        public int TestedCandles {
+            get { return testedCandles; }
+            set {
+                testedCandles = value;
+                OnPropertyChanged(nameof(TestedCandles));
+            }
+        }
+
+        private int avgCandles = Convert.ToInt32(App.Configuration["ScanSettings:AvgCandles"]);
+        public int AvgCandles {
+            get { return avgCandles; }
+            set {
+                avgCandles = value;
+                OnPropertyChanged(nameof(AvgCandles));
+            }
+        }
+
+
+
+        private bool _anySelected = true;
         public bool AnySelected {
             get { return _anySelected; }
             set {
@@ -58,7 +78,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _pinbarSelected = true;
+        private bool _pinbarSelected = false;
         public bool PinbarSelected {
             get { return _pinbarSelected; }
             set {
@@ -76,7 +96,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _engulfingSelected = true;
+        private bool _engulfingSelected = false;
         public bool EngulfingSelected {
             get { return _engulfingSelected; }
             set {
@@ -85,7 +105,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _momentumSelected = true;
+        private bool _momentumSelected = false;
         public bool MomentumSelected {
             get { return _momentumSelected; }
             set {
@@ -94,7 +114,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private bool _soldiersSelected = true;
+        private bool _soldiersSelected = false;
         public bool SoldiersSelected {
             get { return _soldiersSelected; }
             set {
@@ -269,11 +289,13 @@ namespace CryptoScanner.ViewModels {
             var checklist = new OppChecklist();
 
             #region RETREIVE CANDLES:
+            var candlesToBeLoaded = Convert.ToInt32(App.Configuration["ScanSettings:AvgCandles"]);
+            var candlesToBeTested = Convert.ToInt32(App.Configuration["ScanSettings:TestedCandles"]);
             var client = new CryptoAPIClient();
 
             var timeframe = Collections.Timeframes.First(t => t.index == Timeframe);
             var end = DateTime.UtcNow;
-            var start = end.Subtract(TimeSpan.FromMinutes(timeframe.minutes * Values.CANDLES_TO_LOAD));
+            var start = end.Subtract(TimeSpan.FromMinutes(timeframe.minutes * candlesToBeLoaded));
 
             var exchange = string.Empty;
             var candles = await client.GetCandlesAsync(symbol, timeframe.name, start, end);
@@ -284,23 +306,28 @@ namespace CryptoScanner.ViewModels {
             #endregion
 
             #region CHECK UNUSUAL VOLUME:
-            var lastCandleIndex = 1;
-            var prevCandleIndex = 2;
+            var testStartIndex = 1;
+            var testEndIndexExc = testStartIndex + candlesToBeTested;
+            var testVolSum = 0.0;
+            var testVolAvg = 0.0;
+            for (int i = testStartIndex; i < testEndIndexExc; i++) {
+                testVolSum += candles[i].Volume;
+            }
+            testVolAvg = testVolSum / candlesToBeTested;
+
             var isVolumeUnusual = false;
             var volSum = 0.0;
             var volAvg = 0.0;
-            for (int i = prevCandleIndex; i < candles.Count; i++) {
+            for (int i = testEndIndexExc; i < candles.Count; i++) {
                 var candle = candles[i];
                 volSum += candle.Volume;
             }
-            volAvg = volSum / candles.Count;
-
-            Candle lastCandle = candles[lastCandleIndex];
-            isVolumeUnusual = lastCandle.Volume > volAvg * RelativeVolume;
+            volAvg = volSum / (candles.Count - testEndIndexExc);
+            isVolumeUnusual = testVolAvg > volAvg * RelativeVolume;
 
             if (isVolumeUnusual) {
                 checklist.UnusualVolume = true;
-                checklist.RelativeVolume = lastCandle.Volume / volAvg;
+                checklist.RelativeVolume = testVolAvg / volAvg;
             }
             #endregion
 
@@ -330,7 +357,7 @@ namespace CryptoScanner.ViewModels {
                         Exists = true,
                         Checklist = checklist,
                         Symbol = symbol,
-                        CandleTime = lastCandle.Time
+                        CandleTime = candles[1].Time
                     };
                 }
 

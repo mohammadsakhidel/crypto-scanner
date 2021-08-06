@@ -51,6 +51,23 @@
                                 TickFrequency="0.5"
                                 IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}"/>
 
+                        <UniformGrid Columns="2" Margin="0 15 0 0">
+                            <StackPanel Margin="0 0 5 0">
+                                <Label>Tested Candles:</Label>
+                                <TextBox 
+                                    Text="{Binding TestedCandles}"
+                                    IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" 
+                                />
+                            </StackPanel>
+                            <StackPanel Margin="5 0 0 0">
+                                <Label>Candles To Load:</Label>
+                                <TextBox 
+                                    Text="{Binding AvgCandles}"
+                                    IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" 
+                                         />
+                            </StackPanel>
+                        </UniformGrid>
+
                         <StackPanel Margin="0 15 0 0">
                             <CheckBox IsChecked="{Binding AnySelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
                                 <Label Padding="0" Margin="0">Any Pattern</Label>
@@ -80,12 +97,12 @@
                         <Button Margin="0 15 0 0" Content="Stop" 
                                 Command="{Binding Stop}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource cBoolVis}, ConverterParameter=false}"></Button>
-                        
+
                     </StackPanel>
 
                 </Grid>
             </Border>
-            
+
             <!--CONTENT-->
             <Border Grid.Column="1" Margin="20 0 0 0">
                 <Grid>
@@ -112,11 +129,11 @@
                             <TextBlock Style="{StaticResource log}" Text="{Binding Log}"></TextBlock>
                         </ScrollViewer>
                     </Border>
-                    
+
 
                 </Grid>
             </Border>
-            
+
             <!--FOOTER-->
             <Border Grid.Row="1" Style="{StaticResource footer}" Grid.ColumnSpan="2">
                 <Grid>
@@ -126,5 +143,5 @@
             </Border>
         </Grid>
     </Border>
-    
+
 </Window>
