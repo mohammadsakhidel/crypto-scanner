@@ -5,6 +5,7 @@ using CryptoScanner.Constants;
 using CryptoScanner.Models;
 using CryptoScanner.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Skender.Stock.Indicators;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -67,7 +68,23 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
+        private int distanceATRFactor = Convert.ToInt32(App.Configuration["ScanSettings:DistanceATRFactor"]);
+        public int DistanceATRFactor {
+            get { return distanceATRFactor; }
+            set {
+                distanceATRFactor = value;
+                OnPropertyChanged(nameof(DistanceATRFactor));
+            }
+        }
 
+        private bool checkMovings = true;
+        public bool CheckMovings {
+            get { return checkMovings; }
+            set {
+                checkMovings = value;
+                OnPropertyChanged(nameof(CheckMovings));
+            }
+        }
 
         private bool _anySelected = true;
         public bool AnySelected {
@@ -289,8 +306,8 @@ namespace CryptoScanner.ViewModels {
             var checklist = new OppChecklist();
 
             #region RETREIVE CANDLES:
-            var candlesToBeLoaded = Convert.ToInt32(App.Configuration["ScanSettings:AvgCandles"]);
-            var candlesToBeTested = Convert.ToInt32(App.Configuration["ScanSettings:TestedCandles"]);
+            var candlesToBeLoaded = 400;
+            var candlesToBeTested = TestedCandles;
             var client = new CryptoAPIClient();
 
             var timeframe = Collections.Timeframes.First(t => t.index == Timeframe);
@@ -318,31 +335,25 @@ namespace CryptoScanner.ViewModels {
             var isVolumeUnusual = false;
             var volSum = 0.0;
             var volAvg = 0.0;
-            for (int i = testEndIndexExc; i < candles.Count; i++) {
+            for (int i = testEndIndexExc; i < testEndIndexExc + AvgCandles; i++) {
                 var candle = candles[i];
                 volSum += candle.Volume;
             }
-            volAvg = volSum / (candles.Count - testEndIndexExc);
+            volAvg = volSum / (testEndIndexExc + AvgCandles - testEndIndexExc);
             isVolumeUnusual = testVolAvg > volAvg * RelativeVolume;
 
-            if (isVolumeUnusual) {
-                checklist.UnusualVolume = true;
-                checklist.RelativeVolume = testVolAvg / volAvg;
-            }
+            if (!isVolumeUnusual)
+                return new Opportunity { Exists = false };
+
+            checklist.UnusualVolume = true;
+            checklist.RelativeVolume = testVolAvg / volAvg;
             #endregion
 
             #region CHECK CANDLESTICK PATTERN:
             if (!AnySelected) {
-                var pattern = CandlestickPattern.Find(candles);
+                var pattern = AnySelected ? null : CandlestickPattern.Find(candles);
                 if (pattern == null)
                     return new Opportunity { Exists = false };
-
-                checklist.Pattern = pattern;
-            }
-            #endregion
-
-            #region PROCESS CHECKLIST:
-            if (checklist.UnusualVolume) {
 
                 var allowedPatterns = new List<PatternType>();
                 if (PinbarSelected)
@@ -352,19 +363,55 @@ namespace CryptoScanner.ViewModels {
                 if (InsidebarSelected)
                     allowedPatterns.Add(PatternType.Insidebar);
 
-                if (AnySelected || allowedPatterns.Contains(checklist.Pattern.Type)) {
-                    return new Opportunity {
-                        Exists = true,
-                        Checklist = checklist,
-                        Symbol = symbol,
-                        CandleTime = candles[1].Time
-                    };
-                }
+                if (!allowedPatterns.Contains(checklist.Pattern.Type))
+                    return new Opportunity { Exists = false };
 
+                checklist.Pattern = pattern;
             }
             #endregion
 
-            return new Opportunity { Exists = false };
+            #region CHECK MOVINGS:
+            if (CheckMovings) {
+                var quotes = candles.OrderBy(c => c.Time).Select(c => new Quote {
+                    Open = (decimal)c.Open,
+                    Close = (decimal)c.Close,
+                    High = (decimal)c.High,
+                    Low = (decimal)c.Low,
+                    Volume = (decimal)c.Volume,
+                    Date = c.Time
+                });
+
+                var atr14 = quotes.GetAtr(14);
+                var ema50 = quotes.GetEma(50);
+                var ema200 = quotes.GetEma(200);
+
+                var lastEma50 = ema50.ToList()[ema50.Count() - 2].Ema.Value;
+                var lastEma200 = ema200.ToList()[ema200.Count() - 2].Ema.Value;
+                var lastAtr = atr14.ToList()[atr14.Count() - 2].Atr.Value;
+                var lastClose = quotes.ToList()[quotes.Count() - 2].Close;
+
+                // Check EMA50 is above EMA200:
+                /*
+                if (lastClose < lastEma200 || lastEma50 < lastEma200)
+                    return new Opportunity { Exists = false };
+                */
+
+                // Check Emas distance to each other:
+                var diffMA = Math.Abs(lastEma50 - lastEma200);
+                var diffPrice = Math.Abs(lastClose - Math.Max(lastEma50, lastEma200));
+                var atr = lastAtr * DistanceATRFactor;
+
+                if (diffMA > atr || diffPrice > atr)
+                    return new Opportunity { Exists = false };
+            }
+            #endregion
+
+            return new Opportunity {
+                Exists = true,
+                Checklist = checklist,
+                Symbol = symbol,
+                CandleTime = candles[1].Time
+            };
         }
 
         private async Task<bool> SendNotificationAsync(string message) {

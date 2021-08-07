@@ -10,5 +10,6 @@ namespace CryptoScanner.Models {
         public double RelativeVolume { get; set; }
         public bool HasPattern { get; set; }
         public CandlestickPattern Pattern { get; set; }
+        public bool MovingsOK { get; set; }
     }
 }

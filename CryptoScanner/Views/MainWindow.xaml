@@ -69,6 +69,19 @@
                         </UniformGrid>
 
                         <StackPanel Margin="0 15 0 0">
+                            <CheckBox IsChecked="{Binding CheckMovings}" 
+                                  IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
+                                <Label Padding="0" Margin="0">Check 50 - 200 EMAs</Label>
+                            </CheckBox>
+
+                            <Label Margin="0 10 0 0">Distance ATR Factor:</Label>
+                            <TextBox  
+                                Text="{Binding DistanceATRFactor}"
+                                IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" 
+                                />
+                        </StackPanel>
+
+                        <StackPanel Margin="0 15 0 0">
                             <CheckBox IsChecked="{Binding AnySelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
                                 <Label Padding="0" Margin="0">Any Pattern</Label>
                             </CheckBox>
