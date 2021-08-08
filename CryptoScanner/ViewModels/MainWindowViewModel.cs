@@ -174,9 +174,12 @@ namespace CryptoScanner.ViewModels {
 
             // Add to ViewModel:
             assStrategies.ForEach(s => {
+
+                var displayName = s.GetProperty("DisplayName")?.GetValue(null, null);
+
                 var li = new StrategyListItem {
                     AssemblyName = assembly.FullName,
-                    DisplayName = s.Name,
+                    DisplayName = displayName != null ? displayName.ToString() : s.Name,
                     FullyQualifiedName = s.FullName,
                     Selected = false,
                     Strategy = Activator.CreateInstance(s) as IStrategy

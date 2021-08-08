@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace CryptoScanner.Strategies {
-    public class MovingsStrategy : IStrategy {
+    public class PriceCrossingEMAStrategy : IStrategy {
+        public static string DisplayName => "Price Crossing EMAs";
 
         public int GetCandlesCount() {
             return 400;
