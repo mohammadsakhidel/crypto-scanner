@@ -1,5 +1,6 @@
 ﻿using CoinEx.Net;
 using CryptoExchange.Net.Authentication;
+using CryptoLib;
 using CryptoScanner.Commands;
 using CryptoScanner.Constants;
 using CryptoScanner.Models;
@@ -8,8 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Skender.Stock.Indicators;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +20,12 @@ using System.Windows.Threading;
 
 namespace CryptoScanner.ViewModels {
     public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel {
+
+        #region Construcotr:
+        public MainWindowViewModel() {
+            LoadStratedies();
+        }
+        #endregion
 
         #region FIELDS:
         private CancellationTokenSource _cts;
@@ -38,6 +47,15 @@ namespace CryptoScanner.ViewModels {
             set {
                 _timeframe = value;
                 OnPropertyChanged(nameof(Timeframe));
+            }
+        }
+
+        private bool checkRelativeVolume = true;
+        public bool CheckRelativeVolume {
+            get { return checkRelativeVolume; }
+            set {
+                checkRelativeVolume = value;
+                OnPropertyChanged(nameof(CheckRelativeVolume));
             }
         }
 
@@ -68,78 +86,6 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private int distanceATRFactor = Convert.ToInt32(App.Configuration["ScanSettings:DistanceATRFactor"]);
-        public int DistanceATRFactor {
-            get { return distanceATRFactor; }
-            set {
-                distanceATRFactor = value;
-                OnPropertyChanged(nameof(DistanceATRFactor));
-            }
-        }
-
-        private bool checkMovings = true;
-        public bool CheckMovings {
-            get { return checkMovings; }
-            set {
-                checkMovings = value;
-                OnPropertyChanged(nameof(CheckMovings));
-            }
-        }
-
-        private bool _anySelected = true;
-        public bool AnySelected {
-            get { return _anySelected; }
-            set {
-                _anySelected = value;
-                OnPropertyChanged(nameof(AnySelected));
-            }
-        }
-
-        private bool _pinbarSelected = false;
-        public bool PinbarSelected {
-            get { return _pinbarSelected; }
-            set {
-                _pinbarSelected = value;
-                OnPropertyChanged(nameof(PinbarSelected));
-            }
-        }
-
-        private bool _insidebarSelected = false;
-        public bool InsidebarSelected {
-            get { return _insidebarSelected; }
-            set {
-                _insidebarSelected = value;
-                OnPropertyChanged(nameof(InsidebarSelected));
-            }
-        }
-
-        private bool _engulfingSelected = false;
-        public bool EngulfingSelected {
-            get { return _engulfingSelected; }
-            set {
-                _engulfingSelected = value;
-                OnPropertyChanged(nameof(EngulfingSelected));
-            }
-        }
-
-        private bool _momentumSelected = false;
-        public bool MomentumSelected {
-            get { return _momentumSelected; }
-            set {
-                _momentumSelected = value;
-                OnPropertyChanged(nameof(MomentumSelected));
-            }
-        }
-
-        private bool _soldiersSelected = false;
-        public bool SoldiersSelected {
-            get { return _soldiersSelected; }
-            set {
-                _soldiersSelected = value;
-                OnPropertyChanged(nameof(SoldiersSelected));
-            }
-        }
-
         private string _error;
         public string Error {
             get { return _error; }
@@ -155,6 +101,15 @@ namespace CryptoScanner.ViewModels {
             set {
                 _log = value;
                 OnPropertyChanged(nameof(Log));
+            }
+        }
+
+        private ObservableCollection<StrategyListItem> strategies = new ObservableCollection<StrategyListItem>();
+        public ObservableCollection<StrategyListItem> Strategies {
+            get { return strategies; }
+            set {
+                strategies = value;
+                OnPropertyChanged(nameof(Strategies));
             }
         }
         #endregion
@@ -208,6 +163,29 @@ namespace CryptoScanner.ViewModels {
         #endregion
 
         #region METHODS:
+        private void LoadStratedies() {
+            var dir = Directory.GetCurrentDirectory();
+            var allAssemblies = Directory.GetFiles(dir, "*.dll");
+            var classLibAssembly = Assembly.LoadFile(Path.Combine(dir, "CryptoLib.dll"));
+            var iStrategyType = classLibAssembly.GetType("CryptoLib.IStrategy");
+
+            foreach (var assemblyFilePath in allAssemblies) {
+                var assembly = Assembly.LoadFile(assemblyFilePath);
+                var allTypes = assembly.GetTypes().Where(t => t.IsClass).ToList();
+                var assStrategies = allTypes
+                    .Where(t => iStrategyType.IsAssignableFrom(t))
+                    .ToList();
+                assStrategies.ForEach(s => {
+                    Strategies.Add(new StrategyListItem {
+                        AssemblyName = assembly.FullName,
+                        DisplayName = s.Name,
+                        FullyQualifiedName = s.FullName,
+                        Selected = false
+                    });
+                });
+            }
+        }
+
         private void StartWorking(CancellationToken cancellationToken) {
             Task.Run(async () => {
                 try {
@@ -347,63 +325,6 @@ namespace CryptoScanner.ViewModels {
 
             checklist.UnusualVolume = true;
             checklist.RelativeVolume = testVolAvg / volAvg;
-            #endregion
-
-            #region CHECK CANDLESTICK PATTERN:
-            if (!AnySelected) {
-                var pattern = AnySelected ? null : CandlestickPattern.Find(candles);
-                if (pattern == null)
-                    return new Opportunity { Exists = false };
-
-                var allowedPatterns = new List<PatternType>();
-                if (PinbarSelected)
-                    allowedPatterns.Add(PatternType.Pinbar);
-                if (EngulfingSelected)
-                    allowedPatterns.Add(PatternType.Engulfing);
-                if (InsidebarSelected)
-                    allowedPatterns.Add(PatternType.Insidebar);
-
-                if (!allowedPatterns.Contains(checklist.Pattern.Type))
-                    return new Opportunity { Exists = false };
-
-                checklist.Pattern = pattern;
-            }
-            #endregion
-
-            #region CHECK MOVINGS:
-            if (CheckMovings) {
-                var quotes = candles.OrderBy(c => c.Time).Select(c => new Quote {
-                    Open = (decimal)c.Open,
-                    Close = (decimal)c.Close,
-                    High = (decimal)c.High,
-                    Low = (decimal)c.Low,
-                    Volume = (decimal)c.Volume,
-                    Date = c.Time
-                });
-
-                var atr14 = quotes.GetAtr(14);
-                var ema50 = quotes.GetEma(50);
-                var ema200 = quotes.GetEma(200);
-
-                var lastEma50 = ema50.ToList()[ema50.Count() - 2].Ema.Value;
-                var lastEma200 = ema200.ToList()[ema200.Count() - 2].Ema.Value;
-                var lastAtr = atr14.ToList()[atr14.Count() - 2].Atr.Value;
-                var lastClose = quotes.ToList()[quotes.Count() - 2].Close;
-
-                // Check EMA50 is above EMA200:
-                /*
-                if (lastClose < lastEma200 || lastEma50 < lastEma200)
-                    return new Opportunity { Exists = false };
-                */
-
-                // Check Emas distance to each other:
-                var diffMA = Math.Abs(lastEma50 - lastEma200);
-                var diffPrice = Math.Abs(lastClose - Math.Max(lastEma50, lastEma200));
-                var atr = lastAtr * DistanceATRFactor;
-
-                if (diffMA > atr || diffPrice > atr)
-                    return new Opportunity { Exists = false };
-            }
             #endregion
 
             return new Opportunity {

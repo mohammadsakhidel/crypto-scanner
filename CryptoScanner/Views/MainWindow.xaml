@@ -30,87 +30,77 @@
                     </Border>
 
                     <StackPanel Grid.Row="1" Margin="20">
-                        <Label>Time Frame:</Label>
-                        <ComboBox SelectedIndex="{Binding Timeframe}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
-                            <ComboBoxItem>M1</ComboBoxItem>
-                            <ComboBoxItem>M5</ComboBoxItem>
-                            <ComboBoxItem>M15</ComboBoxItem>
-                            <ComboBoxItem>M30</ComboBoxItem>
-                            <ComboBoxItem>H1</ComboBoxItem>
-                            <ComboBoxItem>D1</ComboBoxItem>
-                        </ComboBox>
+                        <StackPanel IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
 
-                        <StackPanel Orientation="Horizontal" Margin="0 15 0 0">
-                            <Label>Relative Volume:</Label>
-                            <TextBlock Padding="5" Foreground="#e7e7e7"
+                            <Label>Time Frame:</Label>
+                            <ComboBox SelectedIndex="{Binding Timeframe}">
+                                <ComboBoxItem>M1</ComboBoxItem>
+                                <ComboBoxItem>M5</ComboBoxItem>
+                                <ComboBoxItem>M15</ComboBoxItem>
+                                <ComboBoxItem>M30</ComboBoxItem>
+                                <ComboBoxItem>H1</ComboBoxItem>
+                                <ComboBoxItem>D1</ComboBoxItem>
+                            </ComboBox>
+
+                            <!--Volume-->
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0 15 0 0" >
+                                    <CheckBox IsChecked="{Binding CheckRelativeVolume}">
+                                        <Label Padding="0" Margin="0">Check Relative Volume:</Label>
+                                    </CheckBox>
+                                    <TextBlock Padding="5 0" Foreground="#e7e7e7"
                                        Text="{Binding RelativeVolume, StringFormat=N1}"></TextBlock>
-                        </StackPanel>
-                        <Slider Value="{Binding RelativeVolume}"
-                                Minimum="1" Maximum="10"
-                                IsSnapToTickEnabled="True"
-                                TickFrequency="0.5"
-                                IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}"/>
+                                </StackPanel>
 
-                        <UniformGrid Columns="2" Margin="0 15 0 0">
-                            <StackPanel Margin="0 0 5 0">
-                                <Label>Tested Candles:</Label>
-                                <TextBox 
-                                    Text="{Binding TestedCandles}"
-                                    IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" 
-                                />
+                                <Slider Value="{Binding RelativeVolume}"
+                                        Minimum="1" Maximum="10"
+                                        IsSnapToTickEnabled="True"
+                                        TickFrequency="0.5" 
+                                        IsEnabled="{Binding CheckRelativeVolume}"
+                                        />
+
+                                <UniformGrid Columns="2" Margin="0 15 0 0" IsEnabled="{Binding CheckRelativeVolume}">
+                                    <StackPanel Margin="0 0 5 0">
+                                        <Label>Tested Candles:</Label>
+                                        <TextBox Text="{Binding TestedCandles}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="5 0 0 0">
+                                        <Label>Past Candles:</Label>
+                                        <TextBox Text="{Binding AvgCandles}" />
+                                    </StackPanel>
+                                </UniformGrid>
                             </StackPanel>
-                            <StackPanel Margin="5 0 0 0">
-                                <Label>Candles To Load:</Label>
-                                <TextBox 
-                                    Text="{Binding AvgCandles}"
-                                    IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" 
-                                         />
+
+                            <!--Strategy-->
+                            <StackPanel Margin="0 15 0 0">
+                                <ListBox 
+                                HorizontalAlignment="Stretch"
+                                Height="100"
+                                ItemsSource="{Binding Strategies}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <ListBoxItem IsSelected="{Binding Selected}">
+                                                <CheckBox IsChecked="{Binding Selected}" 
+                                                      Content="{Binding Path=DisplayName}" 
+                                                      />
+                                            </ListBoxItem>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                             </StackPanel>
-                        </UniformGrid>
 
-                        <StackPanel Margin="0 15 0 0">
-                            <CheckBox IsChecked="{Binding CheckMovings}" 
-                                  IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
-                                <Label Padding="0" Margin="0">Check 50 - 200 EMAs</Label>
-                            </CheckBox>
-
-                            <Label Margin="0 10 0 0">Distance ATR Factor:</Label>
-                            <TextBox  
-                                Text="{Binding DistanceATRFactor}"
-                                IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}" 
-                                />
                         </StackPanel>
 
-                        <StackPanel Margin="0 15 0 0">
-                            <CheckBox IsChecked="{Binding AnySelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
-                                <Label Padding="0" Margin="0">Any Pattern</Label>
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding PinbarSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
-                                <Label Padding="0" Margin="0">Pinbar</Label>
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding EngulfingSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
-                                <Label Padding="0" Margin="0">Engulfing</Label>
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding MomentumSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
-                                <Label Padding="0" Margin="0">Momentum</Label>
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding SoldiersSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
-                                <Label Padding="0" Margin="0">Soldiers</Label>
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding InsidebarSelected}" IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}"
-                                      Visibility="Collapsed">
-                                <Label Padding="0" Margin="0">Insidebar</Label>
-                            </CheckBox>
-                        </StackPanel>
-
-                        <Button Margin="0 15 0 0" Content="Start Scanning..." 
+                        <Grid>
+                            <!--Strat & Stop-->
+                            <Button Margin="0 15 0 0" Content="Start Scanning..." 
                                 Command="{Binding Start}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource cBoolVis}, ConverterParameter=true}"></Button>
 
-                        <Button Margin="0 15 0 0" Content="Stop" 
+                            <Button Margin="0 15 0 0" Content="Stop" 
                                 Command="{Binding Stop}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource cBoolVis}, ConverterParameter=false}"></Button>
-
+                        </Grid>
                     </StackPanel>
 
                 </Grid>

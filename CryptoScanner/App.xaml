@@ -8,6 +8,7 @@
 
             <c:BoolToVisibilityConverter x:Key="cBoolVis" />
             <c:NotConverter x:Key="cNot" />
+            <c:NullMessageConverter x:Key="cNullMessage" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/_Templates.xaml" />
