@@ -1,10 +1,9 @@
-﻿using CryptoLib;
-using Skender.Stock.Indicators;
+﻿using Skender.Stock.Indicators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CryptoLib.Strategies {
+namespace CryptoScanner.Strategies {
     public class MovingsStrategy : IStrategy {
 
         public int GetCandlesCount() {

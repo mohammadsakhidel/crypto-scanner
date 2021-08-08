@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CryptoScanner.Strategies;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,7 @@ namespace CryptoScanner.Models {
         public string FullyQualifiedName { get; set; }
         public string AssemblyName { get; set; }
         public bool Selected { get; set; }
+
+        public IStrategy Strategy { get; set; }
     }
 }

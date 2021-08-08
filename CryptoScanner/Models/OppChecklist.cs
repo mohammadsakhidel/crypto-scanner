@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace CryptoScanner.Models {
     public class OppChecklist {
-        public bool UnusualVolume { get; set; }
+        public bool HasUnusualVolume { get; set; }
         public double RelativeVolume { get; set; }
-        public bool HasPattern { get; set; }
-        public CandlestickPattern Pattern { get; set; }
-        public bool MovingsOK { get; set; }
+        public bool HasStrategy { get; set; }
+        public string StrategyName { get; set; }
     }
 }

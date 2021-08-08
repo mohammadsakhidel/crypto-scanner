@@ -33,7 +33,6 @@
     <Content Include="numbers.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <ProjectReference Include="..\CryptoLib\CryptoLib.csproj" />
     <Resource Include="Resources\Images\bitcoin.ico" />
     <Resource Include="Resources\Images\bitcoin.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

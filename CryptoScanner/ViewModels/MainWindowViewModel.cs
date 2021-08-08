@@ -1,9 +1,9 @@
 ﻿using CoinEx.Net;
 using CryptoExchange.Net.Authentication;
-using CryptoLib;
 using CryptoScanner.Commands;
 using CryptoScanner.Constants;
 using CryptoScanner.Models;
+using CryptoScanner.Strategies;
 using CryptoScanner.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Skender.Stock.Indicators;
@@ -165,25 +165,24 @@ namespace CryptoScanner.ViewModels {
         #region METHODS:
         private void LoadStratedies() {
             var dir = Directory.GetCurrentDirectory();
-            var allAssemblies = Directory.GetFiles(dir, "*.dll");
-            var classLibAssembly = Assembly.LoadFile(Path.Combine(dir, "CryptoLib.dll"));
-            var iStrategyType = classLibAssembly.GetType("CryptoLib.IStrategy");
 
-            foreach (var assemblyFilePath in allAssemblies) {
-                var assembly = Assembly.LoadFile(assemblyFilePath);
-                var allTypes = assembly.GetTypes().Where(t => t.IsClass).ToList();
-                var assStrategies = allTypes
-                    .Where(t => iStrategyType.IsAssignableFrom(t))
-                    .ToList();
-                assStrategies.ForEach(s => {
-                    Strategies.Add(new StrategyListItem {
-                        AssemblyName = assembly.FullName,
-                        DisplayName = s.Name,
-                        FullyQualifiedName = s.FullName,
-                        Selected = false
-                    });
-                });
-            }
+            var assembly = typeof(IStrategy).Assembly;
+            var allTypes = assembly.GetTypes().Where(t => t.IsClass).ToList();
+            var assStrategies = allTypes
+                .Where(t => typeof(IStrategy).IsAssignableFrom(t))
+                .ToList();
+
+            // Add to ViewModel:
+            assStrategies.ForEach(s => {
+                var li = new StrategyListItem {
+                    AssemblyName = assembly.FullName,
+                    DisplayName = s.Name,
+                    FullyQualifiedName = s.FullName,
+                    Selected = false,
+                    Strategy = Activator.CreateInstance(s) as IStrategy
+                };
+                Strategies.Add(li);
+            });
         }
 
         private void StartWorking(CancellationToken cancellationToken) {
@@ -210,7 +209,7 @@ namespace CryptoScanner.ViewModels {
                     AddToLog($"ERROR: [{ex.Message}]");
                     Error = ex.Message;
                     await Task.Run(() => {
-                        Thread.Sleep(5000);
+                        Thread.Sleep(10000);
                         Error = string.Empty;
                     });
                 }
@@ -218,6 +217,10 @@ namespace CryptoScanner.ViewModels {
         }
 
         private async Task HandleNewTimeblockEventAsync() {
+
+            // Validate Inputs:
+            if (!CheckRelativeVolume && !Strategies.Any(s => s.Selected))
+                throw new ApplicationException("Invalid inputs. Please check relative volume checking or select a strategy.");
 
             // GET ALL SYMBOLS FROM EXCHANGE:
             var credentials = new ApiCredentials(Values.API_KEY, Values.API_SECRET);
@@ -236,13 +239,17 @@ namespace CryptoScanner.ViewModels {
                 //AddToLog($"Symbols ({symbols.Count()}) data fetched.");
             }
 
+            // Check For Opportunities:
             var opportunities = new List<Opportunity>();
             for (var i = 0; i < symbols.Count(); i++) {
+                if (_cts.IsCancellationRequested)
+                    break;
+
                 var symbol = symbols[i];
                 UpdateLastLine($"Analyzing {symbol} ({i + 1})...");
 
                 var opportunity = await IsOpportunityAsync(symbol);
-                if (opportunity.Exists) {
+                if (opportunity != null && opportunity.Exists) {
                     opportunities.Add(opportunity);
                 }
             }
@@ -280,59 +287,105 @@ namespace CryptoScanner.ViewModels {
         }
 
         private async Task<Opportunity> IsOpportunityAsync(string symbol) {
+            try {
 
-            var checklist = new OppChecklist();
+                var checklist = new OppChecklist();
 
-            #region RETREIVE CANDLES:
-            var candlesToBeLoaded = 400;
-            var candlesToBeTested = TestedCandles;
-            var client = new CryptoAPIClient();
+                #region RETREIVE CANDLES:
+                var selectedStrategies = Strategies
+                    .Where(s => s.Selected)
+                    .Cast<StrategyListItem>()
+                    .ToList();
 
-            var timeframe = Collections.Timeframes.First(t => t.index == Timeframe);
-            var end = DateTime.UtcNow;
-            var start = end.Subtract(TimeSpan.FromMinutes(timeframe.minutes * candlesToBeLoaded));
+                var candlesToBeLoaded = selectedStrategies.Any()
+                    ? selectedStrategies.Max(s => s.Strategy.GetCandlesCount())
+                    : TestedCandles + AvgCandles + 10;
+                var client = new CryptoAPIClient();
 
-            var exchange = string.Empty;
-            var candles = await client.GetCandlesAsync(symbol, timeframe.name, start, end);
-            if (candles == null || !candles.Any()) {
-                //AddToLog($"Error in Retreiving [{symbol}] candles.");
-                return new Opportunity { Exists = false };
+                var timeframe = Collections.Timeframes.First(t => t.index == Timeframe);
+                var end = DateTime.UtcNow;
+                var start = end.Subtract(TimeSpan.FromMinutes(timeframe.minutes * candlesToBeLoaded));
+
+                var exchange = string.Empty;
+                var candles = await client.GetCandlesAsync(symbol, timeframe.name, start, end);
+                if (candles == null || !candles.Any()) {
+                    //AddToLog($"Error in Retreiving [{symbol}] candles.");
+                    return null;
+                }
+                #endregion
+
+                #region CHECK UNUSUAL VOLUME:
+                if (CheckRelativeVolume) {
+                    var candlesToBeTested = TestedCandles;
+                    var testStartIndex = 1;
+                    var testEndIndexExc = testStartIndex + candlesToBeTested;
+                    var testVolSum = 0.0;
+                    var testVolAvg = 0.0;
+                    for (int i = testStartIndex; i < testEndIndexExc; i++) {
+                        testVolSum += candles[i].Volume;
+                    }
+                    testVolAvg = testVolSum / candlesToBeTested;
+
+                    var isVolumeUnusual = false;
+                    var volSum = 0.0;
+                    var volAvg = 0.0;
+                    for (int i = testEndIndexExc; i < testEndIndexExc + AvgCandles; i++) {
+                        var candle = candles[i];
+                        volSum += candle.Volume;
+                    }
+                    volAvg = volSum / (testEndIndexExc + AvgCandles - testEndIndexExc);
+                    isVolumeUnusual = testVolAvg > volAvg * RelativeVolume;
+
+                    if (!isVolumeUnusual)
+                        return null;
+
+                    checklist.HasUnusualVolume = true;
+                    checklist.RelativeVolume = testVolAvg / volAvg;
+                }
+                #endregion
+
+                #region Run Strategies:
+                if (selectedStrategies.Any()) {
+
+                    var quotes = candles
+                    .OrderBy(c => c.Time)
+                    .Select(c => (c.Open, c.High, c.Low, c.Close, c.Volume, c.Time))
+                    .ToList();
+
+                    var isStrategyOk = false;
+                    var metStrategy = string.Empty;
+                    foreach (var strategy in selectedStrategies) {
+                        var isOpportunity = strategy.Strategy.IsOpportunity(quotes);
+                        if (isOpportunity) {
+                            metStrategy = strategy.DisplayName;
+                            isStrategyOk = true;
+                            break;
+                        }
+                    }
+
+                    if (!isStrategyOk)
+                        return null;
+
+                    checklist.HasStrategy = true;
+                    checklist.StrategyName = metStrategy;
+                }
+                #endregion
+
+                return new Opportunity {
+                    Exists = true,
+                    Symbol = symbol,
+                    CandleTime = candles[1].Time,
+                    Checklist = checklist
+                };
+
+            } catch (Exception ex) {
+                Error = $"Error accorred while checking [{symbol}] for opportunities. Error message: {ex.Message}";
+                Task.Run(() => {
+                    Thread.Sleep(3000);
+                    Error = string.Empty;
+                });
+                return null;
             }
-            #endregion
-
-            #region CHECK UNUSUAL VOLUME:
-            var testStartIndex = 1;
-            var testEndIndexExc = testStartIndex + candlesToBeTested;
-            var testVolSum = 0.0;
-            var testVolAvg = 0.0;
-            for (int i = testStartIndex; i < testEndIndexExc; i++) {
-                testVolSum += candles[i].Volume;
-            }
-            testVolAvg = testVolSum / candlesToBeTested;
-
-            var isVolumeUnusual = false;
-            var volSum = 0.0;
-            var volAvg = 0.0;
-            for (int i = testEndIndexExc; i < testEndIndexExc + AvgCandles; i++) {
-                var candle = candles[i];
-                volSum += candle.Volume;
-            }
-            volAvg = volSum / (testEndIndexExc + AvgCandles - testEndIndexExc);
-            isVolumeUnusual = testVolAvg > volAvg * RelativeVolume;
-
-            if (!isVolumeUnusual)
-                return new Opportunity { Exists = false };
-
-            checklist.UnusualVolume = true;
-            checklist.RelativeVolume = testVolAvg / volAvg;
-            #endregion
-
-            return new Opportunity {
-                Exists = true,
-                Checklist = checklist,
-                Symbol = symbol,
-                CandleTime = candles[1].Time
-            };
         }
 
         private async Task<bool> SendNotificationAsync(string message) {

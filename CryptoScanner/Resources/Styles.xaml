@@ -35,10 +35,11 @@
         <Setter Property="BorderBrush" Value="#535353"></Setter>
     </Style>
 
-    <Style x:Key="error" TargetType="Label">
-        <Setter Property="Foreground" Value="#da4f40"></Setter>
-        <Setter Property="FontWeight" Value="Bold"></Setter>
-        <Setter Property="FontSize" Value="14"></Setter>
+    <Style x:Key="error" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="Red"></Setter>
+        <Setter Property="TextWrapping" Value="Wrap"></Setter>
+        <Setter Property="FontWeight" Value="Normal"></Setter>
+        <Setter Property="FontSize" Value="11"></Setter>
     </Style>
 
     <Style x:Key="log" TargetType="TextBlock">

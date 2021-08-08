@@ -140,8 +140,13 @@
             <!--FOOTER-->
             <Border Grid.Row="1" Style="{StaticResource footer}" Grid.ColumnSpan="2">
                 <Grid>
-                    <Label HorizontalAlignment="Left" Style="{StaticResource error}" Content="{Binding Error}"></Label>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    
                     <Label HorizontalAlignment="Center" FontSize="12" Foreground="Gray">Developed by: Mohammad Sakhidel</Label>
+                    <TextBlock Grid.Row="1" HorizontalAlignment="Left" Style="{StaticResource error}" Text="{Binding Error}"></TextBlock>
                 </Grid>
             </Border>
         </Grid>
