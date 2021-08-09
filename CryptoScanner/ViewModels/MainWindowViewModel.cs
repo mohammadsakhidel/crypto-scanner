@@ -106,7 +106,9 @@ namespace CryptoScanner.ViewModels {
 
         private ObservableCollection<StrategyListItem> strategies = new ObservableCollection<StrategyListItem>();
         public ObservableCollection<StrategyListItem> Strategies {
-            get { return strategies; }
+            get {
+                return strategies;
+            }
             set {
                 strategies = value;
                 OnPropertyChanged(nameof(Strategies));
@@ -173,10 +175,9 @@ namespace CryptoScanner.ViewModels {
                 .ToList();
 
             // Add to ViewModel:
+            var listItems = new List<StrategyListItem>();
             assStrategies.ForEach(s => {
-
                 var displayName = s.GetProperty("DisplayName")?.GetValue(null, null);
-
                 var li = new StrategyListItem {
                     AssemblyName = assembly.FullName,
                     DisplayName = displayName != null ? displayName.ToString() : s.Name,
@@ -184,8 +185,9 @@ namespace CryptoScanner.ViewModels {
                     Selected = false,
                     Strategy = Activator.CreateInstance(s) as IStrategy
                 };
-                Strategies.Add(li);
+                listItems.Add(li);
             });
+            listItems.ForEach(li => Strategies.Add(li));
         }
 
         private void StartWorking(CancellationToken cancellationToken) {
