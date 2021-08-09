@@ -8,6 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\**" />
+    <Compile Remove="Utilities\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <EmbeddedResource Remove="Utilities\**" />
+    <None Remove="Services\**" />
+    <None Remove="Utilities\**" />
+    <Page Remove="Services\**" />
+    <Page Remove="Utilities\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="numbers.txt" />
     <None Remove="Resources\Images\bitcoin.ico" />
     <None Remove="Resources\Images\bitcoin.png" />
@@ -22,11 +33,6 @@
     <PackageReference Include="Skender.Stock.Indicators" Version="1.15.0" />
     <PackageReference Include="SmsIrRestfulNetStandard" Version="1.1.5" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Utilities\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>

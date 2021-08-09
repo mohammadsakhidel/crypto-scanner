@@ -350,10 +350,7 @@ namespace CryptoScanner.ViewModels {
                 #region Run Strategies:
                 if (selectedStrategies.Any()) {
 
-                    var quotes = candles
-                    .OrderBy(c => c.Time)
-                    .Select(c => (c.Open, c.High, c.Low, c.Close, c.Volume, c.Time))
-                    .ToList();
+                    var quotes = candles.OrderBy(c => c.Time).ToList();
 
                     var isStrategyOk = false;
                     var metStrategy = string.Empty;
@@ -383,7 +380,7 @@ namespace CryptoScanner.ViewModels {
 
             } catch (Exception ex) {
                 Error = $"Error accorred while checking [{symbol}] for opportunities. Error message: {ex.Message}";
-                Task.Run(() => {
+                _ = Task.Run(() => {
                     Thread.Sleep(3000);
                     Error = string.Empty;
                 });

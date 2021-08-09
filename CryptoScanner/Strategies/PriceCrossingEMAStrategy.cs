@@ -1,4 +1,5 @@
-﻿using Skender.Stock.Indicators;
+﻿using CryptoScanner.Models;
+using Skender.Stock.Indicators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,23 +12,23 @@ namespace CryptoScanner.Strategies {
             return 400;
         }
 
-        public bool IsOpportunity(List<(double o, double h, double l, double c, double v, DateTime dt)> candles) {
+        public bool IsOpportunity(IEnumerable<Candle> candles) {
 
-            var quotes = candles.OrderBy(c => c.dt)
+            var quotes = candles.OrderBy(c => c.Time)
                 .Select(c => new Quote {
-                    Date = c.dt,
-                    Volume = (decimal)c.v,
-                    Open = (decimal)c.o,
-                    High = (decimal)c.h,
-                    Low = (decimal)c.l,
-                    Close = (decimal)c.c
+                    Date = c.Time,
+                    Volume = (decimal)c.Volume,
+                    Open = (decimal)c.Open,
+                    High = (decimal)c.High,
+                    Low = (decimal)c.Low,
+                    Close = (decimal)c.Close
                 }).ToList();
 
             var ema50 = quotes.GetEma(50).ToList();
             var ema200 = quotes.GetEma(200).ToList();
 
             #region Is Last Candle Crossing a Moving?
-            var lastIndex = candles.Count - 2;
+            var lastIndex = candles.Count() - 2;
             var lastCandle = quotes[lastIndex];
             var lastEma50 = ema50[lastIndex].Ema;
             var lastEma200 = ema200[lastIndex].Ema;
