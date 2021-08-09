@@ -12,8 +12,9 @@ namespace CryptoScanner.Strategies {
             return 400;
         }
 
-        public bool IsOpportunity(IEnumerable<Candle> candles) {
+        public (bool result, string desc) IsOpportunity(IEnumerable<Candle> candles) {
 
+            // Arrange:
             var quotes = candles.OrderBy(c => c.Time)
                 .Select(c => new Quote {
                     Date = c.Time,
@@ -27,7 +28,7 @@ namespace CryptoScanner.Strategies {
             var ema50 = quotes.GetEma(50).ToList();
             var ema200 = quotes.GetEma(200).ToList();
 
-            #region Is Last Candle Crossing a Moving?
+            // Is Last Candle Crossing a Moving?
             var lastIndex = candles.Count() - 2;
             var lastCandle = quotes[lastIndex];
             var lastEma50 = ema50[lastIndex].Ema;
@@ -37,10 +38,11 @@ namespace CryptoScanner.Strategies {
             var isCrossingEma200 = lastCandle.Open < lastEma200 && lastCandle.Close > lastEma200;
 
             if (!isCrossingEma50 && !isCrossingEma200)
-                return false;
-            #endregion
+                return (false, string.Empty);
 
-            return true;
+            // Desctiption & Result:
+            var desc = $"EMA {(isCrossingEma50 ? "50" : "200")} Crossing";
+            return (true, desc);
         }
 
     }

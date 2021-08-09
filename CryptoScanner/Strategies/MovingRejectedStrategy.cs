@@ -15,7 +15,7 @@ namespace CryptoScanner.Strategies {
             return 400;
         }
 
-        public bool IsOpportunity(IEnumerable<Candle> candles) {
+        public (bool result, string desc) IsOpportunity(IEnumerable<Candle> candles) {
 
             // Arrange:
             var candlesList = candles.ToList();
@@ -43,7 +43,7 @@ namespace CryptoScanner.Strategies {
                 && lastCandle.Close > lastCandle.Open;
 
             if (!isPinbar)
-                return false;
+                return (false, string.Empty);
 
             // Is any ema Rejected:
             var isEma50Rejected = lastCandle.Low < lastEma50
@@ -53,9 +53,11 @@ namespace CryptoScanner.Strategies {
                 && lastCandle.Close > lastEma200;
 
             if (!isEma200Rejected && !isEma50Rejected)
-                return false;
+                return (false, string.Empty);
 
-            return true;
+            // Description & Result:
+            var desc = $"Pinbar on EMA {(isEma50Rejected ? "50" : "200")}";
+            return (true, desc);
         }
     }
 }

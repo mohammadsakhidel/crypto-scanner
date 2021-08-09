@@ -350,6 +350,7 @@ namespace CryptoScanner.ViewModels {
                 #endregion
 
                 #region Run Strategies:
+                var opportunityDesc = string.Empty;
                 if (selectedStrategies.Any()) {
 
                     var quotes = candles.OrderBy(c => c.Time).ToList();
@@ -358,7 +359,8 @@ namespace CryptoScanner.ViewModels {
                     var metStrategy = string.Empty;
                     foreach (var strategy in selectedStrategies) {
                         var isOpportunity = strategy.Strategy.IsOpportunity(quotes);
-                        if (isOpportunity) {
+                        if (isOpportunity.result) {
+                            opportunityDesc = isOpportunity.desc;
                             metStrategy = strategy.DisplayName;
                             isStrategyOk = true;
                             break;
@@ -377,7 +379,8 @@ namespace CryptoScanner.ViewModels {
                     Exists = true,
                     Symbol = symbol,
                     CandleTime = candles[1].Time,
-                    Checklist = checklist
+                    Checklist = checklist,
+                    Desc = opportunityDesc
                 };
 
             } catch (Exception ex) {

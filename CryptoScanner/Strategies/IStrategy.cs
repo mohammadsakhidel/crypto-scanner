@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace CryptoScanner.Strategies {
     public interface IStrategy {
 
-        bool IsOpportunity(IEnumerable<Candle> candles);
+        (bool result, string desc) IsOpportunity(IEnumerable<Candle> candles);
 
         int GetCandlesCount();
 
