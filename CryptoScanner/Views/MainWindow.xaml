@@ -39,6 +39,7 @@
                                 <ComboBoxItem>M15</ComboBoxItem>
                                 <ComboBoxItem>M30</ComboBoxItem>
                                 <ComboBoxItem>H1</ComboBoxItem>
+                                <ComboBoxItem>H4</ComboBoxItem>
                                 <ComboBoxItem>D1</ComboBoxItem>
                             </ComboBox>
 
