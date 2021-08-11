@@ -256,6 +256,7 @@ namespace CryptoScanner.ViewModels {
                 var opportunity = await IsOpportunityAsync(symbol);
                 if (opportunity != null && opportunity.Exists) {
                     opportunities.Add(opportunity);
+                    UpdateLastLine($"{opportunity.ToString()}\n");
                 }
             }
             UpdateLastLine("\n");
@@ -266,7 +267,7 @@ namespace CryptoScanner.ViewModels {
                 foreach (var opp in opportunities) {
                     message += opp.ToString() + "\n";
                 }
-                AddToLog(message);
+                //AddToLog(message);
 
                 var notificationSent = await SendNotificationAsync(message);
                 if (!notificationSent)
