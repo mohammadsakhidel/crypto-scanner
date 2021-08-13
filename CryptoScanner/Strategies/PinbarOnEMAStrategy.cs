@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CryptoScanner.Strategies {
-    public class MovingRejectedStrategy : IStrategy {
+    public class PinbarOnEMAStrategy : IStrategy {
 
         public static string DisplayName => "Pinbar on EMAs";
 
@@ -39,8 +39,8 @@ namespace CryptoScanner.Strategies {
 
             // Is Pinbar:
             var shadowBodyRatio = 0.66666;
-            var isPinbar = (lastCandle.ShadowSize / lastCandle.BodySize) > shadowBodyRatio
-                && lastCandle.Close > lastCandle.Open;
+            var isPinbar = (lastCandle.ShadowSize / lastCandle.Size) > shadowBodyRatio;
+                //&& lastCandle.Close > lastCandle.Open;
 
             if (!isPinbar)
                 return (false, string.Empty);
