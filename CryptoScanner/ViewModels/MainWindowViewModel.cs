@@ -1,6 +1,4 @@
-﻿using CoinEx.Net;
-using CryptoExchange.Net.Authentication;
-using CryptoScanner.Commands;
+﻿using CryptoScanner.Commands;
 using CryptoScanner.Constants;
 using CryptoScanner.Models;
 using CryptoScanner.Strategies;
@@ -41,7 +39,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private int _timeframe = 2;
+        private int _timeframe = 1;
         public int Timeframe {
             get { return _timeframe; }
             set {
@@ -68,7 +66,7 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
-        private double _relativeVolume = 2.0;
+        private double _relativeVolume = 3.0;
         public double RelativeVolume {
             get { return _relativeVolume; }
             set {
