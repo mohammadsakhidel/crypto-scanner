@@ -114,25 +114,6 @@ namespace CryptoScanner.ViewModels {
                 OnPropertyChanged(nameof(Strategies));
             }
         }
-
-        private List<string> exchanges = Collections.Exchanges;
-        public List<string> Exchanges {
-            get { return exchanges; }
-            set {
-                exchanges = value;
-                OnPropertyChanged(nameof(Exchanges));
-            }
-        }
-
-        private string exchange;
-        public string Exchange {
-            get { return exchange; }
-            set {
-                exchange = value;
-                OnPropertyChanged(nameof(Exchange));
-            }
-        }
-
         #endregion
 
         #region ---------- COMMANDS ----------
@@ -247,15 +228,7 @@ namespace CryptoScanner.ViewModels {
                 throw new ApplicationException("Invalid inputs. Please check relative volume checking or select a strategy.");
 
             // GET ALL SYMBOLS FROM EXCHANGE:
-            var credentials = new ApiCredentials(Values.API_KEY, Values.API_SECRET);
-            var exClient = new CoinExClient(new CoinEx.Net.Objects.CoinExClientOptions {
-                ApiCredentials = credentials
-            });
-            var exApiResult = await exClient.GetSymbolsAsync();
-            if (!exApiResult.Success)
-                throw new ApplicationException(exApiResult.Error.Message);
-
-            var symbols = exApiResult.Data.Where(s => s.Contains("USDT")).ToList();
+            var symbols = await CryptoAPIClient.GetSymbolsAsync();
             if (symbols == null || !symbols.Any()) {
                 AddToLog("Fetching symbols failed.");
                 return;
@@ -272,10 +245,10 @@ namespace CryptoScanner.ViewModels {
                 var symbol = symbols[i];
                 UpdateLastLine($"Analyzing {symbol} ({i + 1})...");
 
-                var opportunity = await IsOpportunityAsync(symbol);
+                var opportunity = await IsOpportunityAsync(symbol.Symbol);
                 if (opportunity != null && opportunity.Exists) {
                     opportunities.Add(opportunity);
-                    UpdateLastLine($"{opportunity.ToString()}\n");
+                    UpdateLastLine($"{opportunity}\n");
                 }
             }
             UpdateLastLine("\n");
@@ -325,14 +298,13 @@ namespace CryptoScanner.ViewModels {
                 var candlesToBeLoaded = selectedStrategies.Any()
                     ? selectedStrategies.Max(s => s.Strategy.GetCandlesCount())
                     : TestedCandles + AvgCandles + 10;
-                var client = new CryptoAPIClient();
 
                 var timeframe = Collections.Timeframes.First(t => t.index == Timeframe);
                 var end = DateTime.UtcNow;
                 var start = end.Subtract(TimeSpan.FromMinutes(timeframe.minutes * candlesToBeLoaded));
 
                 var exchange = string.Empty;
-                var candles = await client.GetCandlesAsync(Exchange, symbol, timeframe.name, start, end);
+                var candles = await CryptoAPIClient.GetCandlesAsync(symbol, timeframe.name, start, end);
                 if (candles == null || !candles.Any()) {
                     throw new ApplicationException("No candles retrieved.");
                 }

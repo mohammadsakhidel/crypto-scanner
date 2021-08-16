@@ -47,4 +47,17 @@
         <Setter Property="FontSize" Value="14"></Setter>
         <Setter Property="Foreground" Value="#e5c067"></Setter>
     </Style>
+
+    <Style x:Key="groupBox" TargetType="GroupBox">
+        <Setter Property="BorderThickness" Value="0.3"></Setter>
+        <Setter Property="BorderBrush" Value="DarkGray"></Setter>
+        <Setter Property="Padding" Value="10 5 10 10"></Setter>
+        <Setter Property="HeaderTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <TextBlock Foreground="LightGray" Text="{Binding}" FontSize="10"></TextBlock>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

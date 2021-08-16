@@ -6,46 +6,65 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CryptoScanner.Utils {
     public class CryptoAPIClient {
 
-        public async Task<List<Candle>> GetCandlesAsync(string exchangeName, string symbol, string timeframeName, DateTime start, DateTime end) {
+
+        public static async Task<List<SymbolInfo>> GetSymbolsAsync(bool onlyFutures = true) {
+
+            using var http = new HttpClient();
+            var url = $"https://api.binance.com/api/v3/exchangeInfo";
+            var response = await http.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+                throw new ApplicationException($"Error in retrieving symbols. StatusCode: {response.StatusCode}, Reason: {response.ReasonPhrase}");
+
+            var exchangeInfo = await response.Content.ReadFromJsonAsync<ExchangeInfo>();
+            return exchangeInfo.Symbols
+                .Where(s => 
+                    s.QuoteAsset.ToUpper() == "USDT" 
+                    && (!onlyFutures || s.IsMarginTradingAllowed)
+                 )
+                .ToList();
+
+        }
+
+        public static async Task<List<Candle>> GetCandlesAsync(string symbol, string timeframeName, DateTime start, DateTime end) {
             try {
 
                 // Arrange:
                 var list = new List<Candle>();
                 var timeframe = Collections.Timeframes.First(t => t.name == timeframeName);
-                var from = ((DateTimeOffset)start).ToUnixTimeSeconds();
-                var to = ((DateTimeOffset)end).ToUnixTimeSeconds();
+                var from = ((DateTimeOffset)start).ToUnixTimeMilliseconds();
+                var to = ((DateTimeOffset)end).ToUnixTimeMilliseconds();
                 using var http = new HttpClient();
                 http.Timeout = TimeSpan.FromMinutes(timeframe.minutes);
 
-                var exchanges = new List<string> { exchangeName };
-                foreach (var exchange in exchanges) {
+                // Call Binance API:
+                var url = $"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={timeframe.resolution}&startTime={from}&endTime={to}";
+                var response = await http.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    throw new ApplicationException($"Server error. StatusCode: {response.StatusCode}, Reason: {response.ReasonPhrase}");
 
-                    var url = $"https://finnhub.io/api/v1/crypto/candle?symbol={exchange}:{symbol.ToUpper()}&resolution={timeframe.resolution}&from={from}&to={to}&token={Values.CRYPTO_CANDLES_API_TOKEN}";
-                    var response = await http.GetAsync(url);
-                    if (response.IsSuccessStatusCode) {
-                        var candleCollection = await response.Content.ReadFromJsonAsync<CandleCollection>();
-                        if (candleCollection.Status.ToLower() != "ok")
-                            continue;
+                var candlesArray = await response.Content.ReadFromJsonAsync<List<object[]>>();
+                if (candlesArray == null || !candlesArray.Any())
+                    return null;
 
-                        for (int i = 0; i < candleCollection.Opens.Count; i++) {
-                            var candle = new Candle {
-                                Exchange = exchange,
-                                Time = DateTimeOffset.FromUnixTimeSeconds(candleCollection.Times[i]).DateTime,
-                                Open = candleCollection.Opens[i],
-                                Close = candleCollection.Closes[i],
-                                High = candleCollection.Highs[i],
-                                Low = candleCollection.Lows[i],
-                                Volume = candleCollection.Volumes[i]
-                            };
-                            list.Add(candle);
-                        }
-                        break;
-                    }
+                for (int i = 0; i < candlesArray.Count; i++) {
+                    var c = candlesArray[i];
+                    var candle = new Candle {
+                        Exchange = "BINANCE",
+                        Time = DateTimeOffset.FromUnixTimeMilliseconds(((JsonElement)c[0]).GetInt64()).DateTime,
+                        Open = double.Parse(((JsonElement)c[1]).GetString()),
+                        High = double.Parse(((JsonElement)c[2]).GetString()),
+                        Low = double.Parse(((JsonElement)c[3]).GetString()),
+                        Close = double.Parse(((JsonElement)c[4]).GetString()),
+                        Volume = double.Parse(((JsonElement)c[5]).GetString()),
+                        TradesCount = ((JsonElement)c[8]).GetInt32()
+                    };
+                    list.Add(candle);
                 }
 
                 return list.OrderByDescending(c => c.Time).ToList();

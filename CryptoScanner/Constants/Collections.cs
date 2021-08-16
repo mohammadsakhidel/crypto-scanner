@@ -7,17 +7,13 @@ using System.Threading.Tasks;
 namespace CryptoScanner.Constants {
     public static class Collections {
         public static List<(int index, string name, int minutes, string resolution)> Timeframes = new List<(int index, string name, int minutes, string resolution)> {
-            (0, "M1", 1, "1"),
-            (1, "M5", 5, "5"),
-            (2, "M15", 15, "15"),
-            (3, "M30", 30, "30"),
-            (4, "H1", 60, "60"),
-            (5, "H4", 240, "240"),
-            (6, "D1", 1440, "D")
-        };
-
-        public static List<string> Exchanges = new List<string> {
-            "BINANCE", "HUOBI", "KRAKEN", "HITBTC", "COINBASE", "GEMINI", "POLONIEX", "ZB", "BITTREX", "KUCOIN", "OKEX", "BITFINEX"
+            (0, "M1", 1, "1m"),
+            (1, "M5", 5, "5m"),
+            (2, "M15", 15, "15m"),
+            (3, "M30", 30, "30m"),
+            (4, "H1", 60, "1h"),
+            (5, "H4", 240, "4h"),
+            (6, "D1", 1440, "1d")
         };
     }
 }
