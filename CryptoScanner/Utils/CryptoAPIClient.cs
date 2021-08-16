@@ -25,6 +25,7 @@ namespace CryptoScanner.Utils {
             return exchangeInfo.Symbols
                 .Where(s => 
                     s.QuoteAsset.ToUpper() == "USDT" 
+                    && s.IsSpotTradingAllowed
                     && (!onlyFutures || s.IsMarginTradingAllowed)
                  )
                 .ToList();

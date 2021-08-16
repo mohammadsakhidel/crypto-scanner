@@ -32,6 +32,7 @@
                     <StackPanel Grid.Row="1" Margin="20 10">
                         <StackPanel IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
 
+                            <!--Time Frame-->
                             <Label Margin="0 5 0 0">Time Frame:</Label>
                             <ComboBox SelectedIndex="{Binding Timeframe}" Margin="0">
                                 <ComboBoxItem>M1</ComboBoxItem>
@@ -42,6 +43,11 @@
                                 <ComboBoxItem>H4</ComboBoxItem>
                                 <ComboBoxItem>D1</ComboBoxItem>
                             </ComboBox>
+                            
+                            <!--Only Futures-->
+                            <CheckBox IsChecked="{Binding OnlyFutures}" Margin="0 15 0 0">
+                                <Label Padding="0" Margin="0">Only Search Futures</Label>
+                            </CheckBox>
 
                             <!--Volume-->
                             <GroupBox Header="Relative Volume" Style="{StaticResource groupBox}" Margin="0 15">

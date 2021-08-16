@@ -50,6 +50,15 @@ namespace CryptoScanner.ViewModels {
             }
         }
 
+        private bool onlyFutures = true;
+        public bool OnlyFutures {
+            get { return onlyFutures; }
+            set {
+                onlyFutures = value;
+                OnPropertyChanged(nameof(OnlyFutures));
+            }
+        }
+
         private bool checkRelativeVolume = true;
         public bool CheckRelativeVolume {
             get { return checkRelativeVolume; }
@@ -228,7 +237,7 @@ namespace CryptoScanner.ViewModels {
                 throw new ApplicationException("Invalid inputs. Please check relative volume checking or select a strategy.");
 
             // GET ALL SYMBOLS FROM EXCHANGE:
-            var symbols = await CryptoAPIClient.GetSymbolsAsync();
+            var symbols = await CryptoAPIClient.GetSymbolsAsync(OnlyFutures);
             if (symbols == null || !symbols.Any()) {
                 AddToLog("Fetching symbols failed.");
                 return;
@@ -243,7 +252,7 @@ namespace CryptoScanner.ViewModels {
                     break;
 
                 var symbol = symbols[i];
-                UpdateLastLine($"Analyzing {symbol} ({i + 1})...");
+                UpdateLastLine($"Analyzing {symbol} ({i + 1} / {symbols.Count})...");
 
                 var opportunity = await IsOpportunityAsync(symbol.Symbol);
                 if (opportunity != null && opportunity.Exists) {
