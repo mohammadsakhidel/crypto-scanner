@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace CryptoScanner.Utils {
     public class CryptoAPIClient {
 
-        public async Task<List<Candle>> GetCandlesAsync(string symbol, string timeframeName, DateTime start, DateTime end) {
+        public async Task<List<Candle>> GetCandlesAsync(string exchangeName, string symbol, string timeframeName, DateTime start, DateTime end) {
             try {
 
                 // Arrange:
@@ -19,10 +19,10 @@ namespace CryptoScanner.Utils {
                 var timeframe = Collections.Timeframes.First(t => t.name == timeframeName);
                 var from = ((DateTimeOffset)start).ToUnixTimeSeconds();
                 var to = ((DateTimeOffset)end).ToUnixTimeSeconds();
-                var exchanges = new string[] { "BINANCE" }; //, "HUOBI", "KRAKEN", "HITBTC", "COINBASE", "GEMINI", "POLONIEX", "ZB", "BITTREX", "KUCOIN", "OKEX", "BITFINEX" };
                 using var http = new HttpClient();
                 http.Timeout = TimeSpan.FromMinutes(timeframe.minutes);
 
+                var exchanges = new List<string> { exchangeName };
                 foreach (var exchange in exchanges) {
 
                     var url = $"https://finnhub.io/api/v1/crypto/candle?symbol={exchange}:{symbol.ToUpper()}&resolution={timeframe.resolution}&from={from}&to={to}&token={Values.CRYPTO_CANDLES_API_TOKEN}";

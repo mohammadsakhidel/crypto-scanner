@@ -114,6 +114,25 @@ namespace CryptoScanner.ViewModels {
                 OnPropertyChanged(nameof(Strategies));
             }
         }
+
+        private List<string> exchanges = Collections.Exchanges;
+        public List<string> Exchanges {
+            get { return exchanges; }
+            set {
+                exchanges = value;
+                OnPropertyChanged(nameof(Exchanges));
+            }
+        }
+
+        private string exchange;
+        public string Exchange {
+            get { return exchange; }
+            set {
+                exchange = value;
+                OnPropertyChanged(nameof(Exchange));
+            }
+        }
+
         #endregion
 
         #region ---------- COMMANDS ----------
@@ -313,10 +332,9 @@ namespace CryptoScanner.ViewModels {
                 var start = end.Subtract(TimeSpan.FromMinutes(timeframe.minutes * candlesToBeLoaded));
 
                 var exchange = string.Empty;
-                var candles = await client.GetCandlesAsync(symbol, timeframe.name, start, end);
+                var candles = await client.GetCandlesAsync(Exchange, symbol, timeframe.name, start, end);
                 if (candles == null || !candles.Any()) {
-                    //AddToLog($"Error in Retreiving [{symbol}] candles.");
-                    return null;
+                    throw new ApplicationException("No candles retrieved.");
                 }
                 #endregion
 
@@ -335,7 +353,8 @@ namespace CryptoScanner.ViewModels {
                     var isVolumeUnusual = false;
                     var volSum = 0.0;
                     var volAvg = 0.0;
-                    for (int i = testEndIndexExc; i < testEndIndexExc + AvgCandles; i++) {
+                    var avgEndIndex = Math.Min(testEndIndexExc + AvgCandles, candles.Count);
+                    for (int i = testEndIndexExc; i < avgEndIndex; i++) {
                         var candle = candles[i];
                         volSum += candle.Volume;
                     }
@@ -385,7 +404,7 @@ namespace CryptoScanner.ViewModels {
                 };
 
             } catch (Exception ex) {
-                Error = $"Error accorred while checking [{symbol}] for opportunities. Error message: {ex.Message}";
+                Error = $"Error in [{symbol}]. Message: {ex.Message}";
                 _ = Task.Run(() => {
                     Thread.Sleep(3000);
                     Error = string.Empty;

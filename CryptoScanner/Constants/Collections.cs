@@ -15,5 +15,9 @@ namespace CryptoScanner.Constants {
             (5, "H4", 240, "240"),
             (6, "D1", 1440, "D")
         };
+
+        public static List<string> Exchanges = new List<string> {
+            "BINANCE", "HUOBI", "KRAKEN", "HITBTC", "COINBASE", "GEMINI", "POLONIEX", "ZB", "BITTREX", "KUCOIN", "OKEX", "BITFINEX"
+        };
     }
 }
