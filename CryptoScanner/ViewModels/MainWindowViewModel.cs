@@ -307,11 +307,9 @@ namespace CryptoScanner.ViewModels {
                     : TestedCandles + AvgCandles + 10;
 
                 var timeframe = Collections.Timeframes.First(t => t.index == Timeframe);
-                var end = DateTime.UtcNow;
-                var start = end.Subtract(TimeSpan.FromMinutes(timeframe.minutes * candlesToBeLoaded));
 
                 var exchange = string.Empty;
-                var candles = await CryptoAPIClient.GetCandlesAsync(symbol, timeframe.name, start, end);
+                var candles = await CryptoAPIClient.GetCandlesAsync(symbol, timeframe.name, candlesToBeLoaded);
                 if (candles == null || !candles.Any()) {
                     throw new ApplicationException("No candles retrieved.");
                 }

@@ -40,9 +40,9 @@ namespace CryptoScanner.Strategies {
             var lastAtr = (double)atr[index].Atr;
 
             // Check Conditions:
-            var areConditionsMet = lastEma50 > lastEma200
-                && lastCandle.Close > lastEma200
-                && Math.Abs(lastEma50 - lastEma200) > lastAtr;
+            var areConditionsMet = 
+                lastCandle.Close > lastEma200
+                && Math.Abs(lastEma50 - lastEma200) <= lastAtr * 1.5;
 
             if (!areConditionsMet)
                 return (false, string.Empty);

@@ -32,19 +32,17 @@ namespace CryptoScanner.Utils {
 
         }
 
-        public static async Task<List<Candle>> GetCandlesAsync(string symbol, string timeframeName, DateTime start, DateTime end) {
+        public static async Task<List<Candle>> GetCandlesAsync(string symbol, string timeframeName, int count) {
             try {
 
                 // Arrange:
                 var list = new List<Candle>();
                 var timeframe = Collections.Timeframes.First(t => t.name == timeframeName);
-                var from = ((DateTimeOffset)start).ToUnixTimeMilliseconds();
-                var to = ((DateTimeOffset)end).ToUnixTimeMilliseconds();
                 using var http = new HttpClient();
                 http.Timeout = TimeSpan.FromMinutes(timeframe.minutes);
 
                 // Call Binance API:
-                var url = $"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={timeframe.resolution}&startTime={from}&endTime={to}";
+                var url = $"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={timeframe.resolution}&limit={count}";
                 var response = await http.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                     throw new ApplicationException($"Server error. StatusCode: {response.StatusCode}, Reason: {response.ReasonPhrase}");
