@@ -16,7 +16,8 @@ namespace CryptoScanner.Utils {
         public static async Task<List<SymbolInfo>> GetSymbolsAsync(bool onlyFutures = true) {
 
             using var http = new HttpClient();
-            var url = $"https://api.binance.com/api/v3/exchangeInfo";
+            var baseAddress = App.Configuration["API:BaseAddress"];
+            var url = $"{baseAddress}/exchangeInfo";
             var response = await http.GetAsync(url);
             if (!response.IsSuccessStatusCode)
                 throw new ApplicationException($"Error in retrieving symbols. StatusCode: {response.StatusCode}, Reason: {response.ReasonPhrase}");
@@ -42,7 +43,8 @@ namespace CryptoScanner.Utils {
                 http.Timeout = TimeSpan.FromMinutes(timeframe.minutes);
 
                 // Call Binance API:
-                var url = $"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={timeframe.resolution}&limit={count}";
+                var baseAddress = App.Configuration["API:BaseAddress"];
+                var url = $"{baseAddress}/klines?symbol={symbol}&interval={timeframe.resolution}&limit={count}";
                 var response = await http.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                     throw new ApplicationException($"Server error. StatusCode: {response.StatusCode}, Reason: {response.ReasonPhrase}");
