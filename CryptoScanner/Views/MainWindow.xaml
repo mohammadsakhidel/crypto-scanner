@@ -32,8 +32,14 @@
                     <StackPanel Grid.Row="1" Margin="20 10">
                         <StackPanel IsEnabled="{Binding IsScanning, Converter={StaticResource cNot}}">
 
+                            <!--Quote Asset-->
+                            <Button 
+                                Command="{Binding ToggleQuoteAsset}"
+                                Content="{Binding QuoteAsset, Converter={StaticResource cPrependText}, ConverterParameter='Quote Asset:'}"
+                                FontWeight="Bold" />
+
                             <!--Time Frame-->
-                            <Label Margin="0 5 0 0">Time Frame:</Label>
+                            <Label Margin="0 10 0 0">Time Frame:</Label>
                             <ComboBox SelectedIndex="{Binding Timeframe}" Margin="0">
                                 <ComboBoxItem>M1</ComboBoxItem>
                                 <ComboBoxItem>M5</ComboBoxItem>

@@ -13,7 +13,7 @@ namespace CryptoScanner.Utils {
     public class CryptoAPIClient {
 
 
-        public static async Task<List<SymbolInfo>> GetSymbolsAsync(bool onlyFutures = true) {
+        public static async Task<List<SymbolInfo>> GetSymbolsAsync(string quoteAsset, bool onlyFutures = true) {
 
             using var http = new HttpClient();
             var baseAddress = App.Configuration["API:BaseAddress"];
@@ -25,7 +25,7 @@ namespace CryptoScanner.Utils {
             var exchangeInfo = await response.Content.ReadFromJsonAsync<ExchangeInfo>();
             return exchangeInfo.Symbols
                 .Where(s => 
-                    s.QuoteAsset.ToUpper() == "USDT" 
+                    s.QuoteAsset.ToUpper() == quoteAsset.ToUpper() 
                     && s.IsSpotTradingAllowed
                     && (!onlyFutures || s.IsMarginTradingAllowed)
                  )

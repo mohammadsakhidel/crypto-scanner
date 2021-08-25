@@ -121,6 +121,16 @@ namespace CryptoScanner.ViewModels {
                 OnPropertyChanged(nameof(Strategies));
             }
         }
+
+        private string quoteAsset = "BTC";
+        public string QuoteAsset {
+            get { return quoteAsset; }
+            set {
+                quoteAsset = value;
+                OnPropertyChanged(nameof(quoteAsset));
+            }
+        }
+
         #endregion
 
         #region ---------- COMMANDS ----------
@@ -169,6 +179,20 @@ namespace CryptoScanner.ViewModels {
                 return _clearLogs;
             }
         }
+
+        private RelayCommand _toggleQuoteAsset;
+        public RelayCommand ToggleQuoteAsset {
+            get {
+                if (_toggleQuoteAsset == null) {
+                    _toggleQuoteAsset = new RelayCommand(p => {
+                        QuoteAsset = (QuoteAsset.ToUpper() == "BTC" ? "USDT" : "BTC");
+                    });
+                }
+
+                return _toggleQuoteAsset;
+            }
+        }
+
         #endregion
 
         #region METHODS:
@@ -235,7 +259,7 @@ namespace CryptoScanner.ViewModels {
                 throw new ApplicationException("Invalid inputs. Please check relative volume checking or select a strategy.");
 
             // GET ALL SYMBOLS FROM EXCHANGE:
-            var symbols = await CryptoAPIClient.GetSymbolsAsync(OnlyFutures);
+            var symbols = await CryptoAPIClient.GetSymbolsAsync(QuoteAsset, OnlyFutures);
             if (symbols == null || !symbols.Any()) {
                 AddToLog("Fetching symbols failed.");
                 return;
